@@ -55,24 +55,24 @@ const cardData = [
         name: "Blue Eyes White Dragon",
         type: "Paper",
         img: pathImages+'/dragon.png',
-        winOf: [1],
-        loseOf: [2]
+        winOf: ["Rock"],
+        loseOf: ["Scissors"]
     },
     {
         id: 1,
         name: "Dark Magician",
         type: "Rock",
         img: pathImages+'/magician.png',
-        winOf: [2],
-        loseOf: [0]
+        winOf: ["Scissors"],
+        loseOf: ["Paper"]
     },
     {
         id: 2,
         name: "Exodia",
         type: "Scissors",
         img: pathImages+'/exodia.png',
-        winOf: [0],
-        loseOf: [1]
+        winOf: ["Paper"],
+        loseOf: ["Rock"]
     },
 ];
 
@@ -81,6 +81,12 @@ async function getRandomCardId(maxRange) {
     return cardData[randomIndex].id;
 }
 
+/**
+ * Cria uma carta
+ * @param {integer} cardId 
+ * @param {string} fieldSide 
+ * @returns 
+ */
 async function createCardImage(cardId, fieldSide) {
     let cardIcon = 'src/assets/icons/card-back.png';
     
@@ -93,7 +99,6 @@ async function createCardImage(cardId, fieldSide) {
         cardIcon = 'src/assets/icons/card-front.png';
 
         cardImage.addEventListener('click', () => {
-            // setCardsField(cardImage.getAttribute('data-id'));
             setCardsField(cardId);
         });
 
@@ -108,19 +113,38 @@ async function createCardImage(cardId, fieldSide) {
     return cardImage;
 }
 
-/*
-    Foi definida como async para que as cartas sejam sorteadas para os jogadores
-    simultaneamente.
-*/
+/**
+ * "Saca" as cartas de determinado jogador.
+ * Foi definida como async para que as cartas sejam sorteadas para os jogadores 
+ * simultaneamente.
+ */
 async function drawCards(cardNumbers, fieldSide) {
+    const drawingCards = [];
+
     for (let i = 0; i < cardNumbers; i++) {
-        setTimeout(async () => {
-            const randomIdCard = await getRandomCardId(cardData.length);
-            const cardImage = await createCardImage(randomIdCard, fieldSide);
-    
-            document.getElementById(fieldSide).appendChild(cardImage);
-        }, 400 * i);
+        const drawingCardPromise = new Promise((resolve, reject) => {
+            setTimeout(async () => {
+                const randomIdCard = await getRandomCardId(cardData.length);
+                const cardImage = await createCardImage(randomIdCard, fieldSide);
+
+                // Bloqueia a carta para ela não ser clicada até que todas 
+                // cartas sejam "sacadas"
+                cardImage.style.pointerEvents = 'none';
+        
+                document.getElementById(fieldSide).appendChild(cardImage);
+
+                resolve(cardImage);
+            }, 400 * i);
+        });
+        
+        drawingCards.push(drawingCardPromise);
     }
+
+    // Todas as cartas já foram compradas e são desbloqueadas para o clique.
+    Promise.allSettled(drawingCards)
+        .then((results) => {
+            results.forEach((result) => result.value.style.pointerEvents = 'auto');
+        });
 }
 
 async function setCardsField(playerCardId) {
@@ -139,22 +163,33 @@ async function setCardsField(playerCardId) {
     await drawButton(duelResults);
 }
 
-async function removeAllCardsImages(cardsBox) {
-    let imgElements = cardsBox.querySelectorAll("img");
+/**
+ * Remove todas as cartas da "mão" de determinado jogador.
+ * @param {DOMElement} playerSide 
+ */
+async function removeAllCardsImages(playerSide) {
+    let imgElements = playerSide.querySelectorAll("img");
 
     imgElements.forEach((img) => img.remove());
 }
 
+/**
+ * Determina o resultado do duelo
+ * @param {integer} playerCardId 
+ * @param {integer} computerCardId 
+ * @returns 
+ */
 async function checkDuelResults(playerCardId, computerCardId) {
     let duelResults = "Draw!";
-    let playerCard = cardData[playerCardId];
+    const playerCard = cardData[playerCardId];
+    const computerCard = cardData[computerCardId];
 
-    if (playerCard.winOf.includes(computerCardId)) {
+    if (playerCard.winOf.includes(computerCard.type)) {
         duelResults = "You Won!";
         state.values.scores.player++;
         playAudio('win');
     } 
-    if (playerCard.loseOf.includes(computerCardId)) {
+    if (playerCard.loseOf.includes(computerCard.type)) {
         duelResults = "You Lose!";
         state.values.scores.computer++;
         playAudio('lose');
@@ -189,6 +224,10 @@ async function hideCardDetails() {
     state.views.cardSprites.avatar.src = '';
 }
 
+/**
+ * Exibe o botão de reiniciar o duelo com determinado texto nele.
+ * @param {string} text 
+ */
 async function drawButton(text) {
     state.actions.button.innerText = text;
     state.actions.button.style.display = 'block';
@@ -204,6 +243,9 @@ async function drawSelectedCard(cardId) {
     state.views.cardSprites.type.innerHTML = 'Attribute: '+cardData[cardId].type;
 }
 
+/**
+ * Reinicia o duelo
+ */
 async function resetDuel() {
     state.views.cardSprites.avatar.src = '';
     state.actions.button.style.display = 'none';
@@ -217,15 +259,27 @@ async function playAudio(status) {
     audio.play();
 }
 
+/**
+ * Inicializa o tabuleiro após o jogador escolher a quantidade de cartas.
+ */
 function confirmModal() {
+    // Define a quantidade de cartas para cada jogador
     state.values.cardsPerPlayer = state.views.selectNumberCards.value;
-    state.views.modal.style.display = 'none';
+
+    hideModal();
 
     initializeBoard();
 }
 
+function hideModal() {
+    state.views.modal.style.display = 'none';
+}
+
 function initializeActions() {
+    // Evento do botão de confirmar a quantidade de cartas
     state.actions.btnConfirmNumberCards.addEventListener('click', confirmModal);
+    // Evento do botão para reiniciar o duelo
+    state.actions.button.addEventListener('click', resetDuel);
 }
 
 function initializeBoard() {
