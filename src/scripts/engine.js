@@ -1,19 +1,27 @@
 
 // Enum
-const playerSides = {
-    player1: "player-cards",
-    computer: "computer-cards",
-}
+const pathImages = 'src/assets/icons',
+    playerSides = {
+        player1: "player-cards",
+        computer: "computer-cards",
+    };
 
+/**
+ * Estado global do game.
+ */
 const state = {
     values: {
         scores : {
             player: 0,
             computer: 0
-        }
+        },
+        cardsPerPlayer: 5
     },
     views: {
-        scoreBox: document.querySelector("#score_points"),
+        scores : {
+            player : document.querySelector("#player_score"),
+            computer : document.querySelector("#computer_score")
+        },
         cardSprites: {
             avatar: document.querySelector("#card-image"),
             name: document.querySelector("#card-name"),
@@ -26,14 +34,17 @@ const state = {
         playerSides: {
             player1: document.getElementById(playerSides.player1),
             computer: document.getElementById(playerSides.computer)
-        }
-    },
+        },
+        selectNumberCards : document.getElementById("select-number-cards"),
+        modal : document.querySelector(".modal-bg")
+    },  
     actions: {
-        button: document.querySelector("#next-duel")
+        button: document.querySelector("#next-duel"),
+        btnConfirmNumberCards : document.querySelector("#confirm-number-cards")
     }
 };
 
-const pathImages = 'src/assets/icons';
+
 
 /**
  * Esta "enumeração" deveria vir de um banco de dados
@@ -65,19 +76,22 @@ const cardData = [
     },
 ];
 
-async function getRandomCardId() {
-    const randomIndex = Math.floor(Math.random() * cardData.length);
+async function getRandomCardId(maxRange) {
+    const randomIndex = Math.floor(Math.random() * maxRange);
     return cardData[randomIndex].id;
 }
 
 async function createCardImage(cardId, fieldSide) {
+    let cardIcon = 'src/assets/icons/card-back.png';
+    
     const cardImage = document.createElement("img");
     cardImage.setAttribute("height", '100px');
-    cardImage.setAttribute("src", 'src/assets/icons/card-back.png');
     cardImage.setAttribute('data-id', cardId);
     cardImage.classList.add('card');
 
     if (fieldSide === playerSides.player1) {
+        cardIcon = 'src/assets/icons/card-front.png';
+
         cardImage.addEventListener('click', () => {
             // setCardsField(cardImage.getAttribute('data-id'));
             setCardsField(cardId);
@@ -88,6 +102,9 @@ async function createCardImage(cardId, fieldSide) {
         });
     }
 
+    // Define o ícone da carta conforme o jogador
+    cardImage.setAttribute("src", cardIcon);
+
     return cardImage;
 }
 
@@ -97,10 +114,12 @@ async function createCardImage(cardId, fieldSide) {
 */
 async function drawCards(cardNumbers, fieldSide) {
     for (let i = 0; i < cardNumbers; i++) {
-        const randomIdCard = await getRandomCardId();
-        const cardImage = await createCardImage(randomIdCard, fieldSide);
-
-        document.getElementById(fieldSide).appendChild(cardImage);
+        setTimeout(async () => {
+            const randomIdCard = await getRandomCardId(cardData.length);
+            const cardImage = await createCardImage(randomIdCard, fieldSide);
+    
+            document.getElementById(fieldSide).appendChild(cardImage);
+        }, 400 * i);
     }
 }
 
@@ -108,7 +127,7 @@ async function setCardsField(playerCardId) {
     await removeAllCardsImages(state.views.playerSides.computer);
     await removeAllCardsImages(state.views.playerSides.player1);
 
-    let computerCardId = await getRandomCardId();
+    let computerCardId = await getRandomCardId(cardData.length);
 
     hideCardDetails();
     showHideCardFieldsImages(true)
@@ -145,7 +164,8 @@ async function checkDuelResults(playerCardId, computerCardId) {
 }
 
 async function updateScore() {
-    state.views.scoreBox.innerHTML = `Win: ${state.values.scores.player} | Lose: ${state.values.scores.computer}`;
+    state.views.scores.player.innerHTML = 'Win: '+state.values.scores.player;
+    state.views.scores.computer.innerHTML = 'Lose: '+state.values.scores.computer;
 }
 
 async function drawCardsInField(playerCardId, computerCardId) {
@@ -188,7 +208,7 @@ async function resetDuel() {
     state.views.cardSprites.avatar.src = '';
     state.actions.button.style.display = 'none';
 
-    init();
+    initializeBoard();
 }
 
 async function playAudio(status) {
@@ -197,11 +217,26 @@ async function playAudio(status) {
     audio.play();
 }
 
-function init() {
+function confirmModal() {
+    state.values.cardsPerPlayer = state.views.selectNumberCards.value;
+    state.views.modal.style.display = 'none';
+
+    initializeBoard();
+}
+
+function initializeActions() {
+    state.actions.btnConfirmNumberCards.addEventListener('click', confirmModal);
+}
+
+function initializeBoard() {
     showHideCardFieldsImages(false);
 
-    drawCards(5, playerSides.player1);
-    drawCards(5, playerSides.computer);
+    drawCards(state.values.cardsPerPlayer, playerSides.player1);
+    drawCards(state.values.cardsPerPlayer, playerSides.computer);
+}
+
+function init() {
+    initializeActions();
 }
 
 init();

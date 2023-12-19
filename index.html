@@ -16,8 +16,11 @@
     <!-- Framework -->
     <link rel="stylesheet" href="src/styles/buttons.css">
     <link rel="stylesheet" href="src/styles/containers_and_frames.css">
+    <link rel="stylesheet" href="src/assets/rpgui/dist/rpgui.min.css">
 
     <link rel="stylesheet" href="src/styles/main.css">
+
+    <link rel="stylesheet" href="src/styles/modal.css">
 </head>
 <body>
     <audio id="bgm" loop autoplay>
@@ -33,7 +36,10 @@
     <div class="container">
         <div class="container__left framed-golden-2">
             <div class="score_box frame">
-                <span id="score_points">Win: 0 | Lose: 0</span>
+                <span id="">
+                    <p id="player_score">Win: 0</p>
+                    <p id="computer_score">Lose: 0</p>
+                </span>
             </div>
             <div class="menu_avatar">
                 <img id="card-image">
@@ -73,6 +79,34 @@
         </div>
     </div>
 
+
+    <div class="modal-bg rpgui-content framed-golden-2">
+        <h1>Yu-Gi-Oh! Jokenpô Edition</h1>
+
+        <div class="modal framed">
+            <div class="content">
+                <span>Number of Cards</span>
+                <div class="inline-section">
+                    How many cards per player?
+                    <select id="select-number-cards" class="rpgui-dropdown">
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                        <option value="6">6</option>
+                        <option value="7">7</option>
+                        <option value="8">8</option>
+                        <option value="9">9</option>
+                        <option value="10">10</option>
+                    </select>
+                </div>
+                <button type="button" id="confirm-number-cards" class="rpgui-button">Ok</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="src/assets/rpgui/dist/rpgui.min.js"></script>
     <script defer src="src/scripts/engine.js"></script>
 </body>
 </html>

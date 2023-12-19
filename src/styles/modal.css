@@ -1,0 +1,84 @@
+.modal-bg {
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(110, 110, 110, .5);
+
+    position: fixed;
+    z-index: 5;
+    top: 0;
+    left: 0;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+
+    gap: 2rem;
+}
+
+.modal-bg .modal {
+    width: 60%;
+    border-radius: 1rem;
+    background-color: rgba(44, 44, 44, 0.95);
+    color: white;
+    padding: 3rem;
+    z-index: 3;
+}
+
+.modal .content {
+    text-align: center;
+    color: white;
+    display: grid;
+    gap: 30px;
+}
+
+.modal .content span {
+    font-size: 1.5rem;
+}
+
+.modal .content div {
+    margin-top: 1rem;
+}
+
+.modal .content div a{
+    color: white;
+    margin-top: 1rem;
+    display: inline-block;
+}
+
+.modal .content select {
+    border: 1px solid black;
+    border-radius: 1rem;
+    width: 6rem;
+    margin: 0 auto;
+    padding: 0 .5rem;
+    font-size: 1.5rem;
+    color: white;
+    text-align: center;
+    background-color: black;
+}
+
+.modal .content button {
+    width: 5rem;
+    padding: .5rem 0;
+    color: white;
+    margin: 0 auto;
+}
+
+.modal .rpgui-dropdown-imp {
+    width: 6rem;
+}
+
+.modal .rpgui-dropdown-imp + ul li{
+    padding: 15px 0;
+}
+
+.modal .content .inline-section {
+    display: flex; 
+    justify-content: center; 
+    gap: 10px;
+}
+
+.modal-bg.rpgui-content h1 {
+    font-size: 2rem;
+}
