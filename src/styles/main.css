@@ -136,6 +136,12 @@ img:hover, button:hover, a:hover {
     border: 1px solid #fff;
 }
 
+.card-infield img{
+    animation: fadein 1s;
+    -moz-animation: fadein 1s;
+    -webkit-animation: fadein 1s;
+}
+
 .card {
     /* ????????????????????????? */
     transition: transform 0.2s;
